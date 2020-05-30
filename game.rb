@@ -41,14 +41,15 @@ class Game
     def run
       @board.drop_bombs
       play_turn until solved?
-      @board.render
+      @board.print
       puts "Congratulations, you win!"
     end
 
     def play_turn
-        @board.render
+        @board.print
         pos = get_pos
         val = get_val
+
         if val == 'F'
             @board.flag(pos)
         elsif val == 'R'
