@@ -41,7 +41,7 @@ class Game
     def run
       @board.drop_bombs
       play_turn until solved?
-      @board.print
+      @board.cheat
       puts "Congratulations, you win!"
     end
 
@@ -54,7 +54,6 @@ class Game
             @board.flag(pos)
         elsif val == 'R'
             @board.reveal(pos)
-            @board.adjacent_bombs(pos)
         end
     end
 

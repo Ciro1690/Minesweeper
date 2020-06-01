@@ -12,11 +12,12 @@ class Board
     [1, 0],
     [1, 1]
   ]
-    attr_reader :grid
+    attr_accessor :grid
 
     def initialize
         row,col,default_value = 9,9,'_'
         @grid = Array.new(row){Array.new(col,default_value)}
+        @checked = []
     end
 
     def [](pos)
@@ -29,6 +30,57 @@ class Board
         grid[x][y] = value
     end
 
+    def flag(pos)
+        self[pos] = 'F'
+    end
+
+    def reveal(pos)
+        self[pos] = bomb_count(pos) if self[pos] != 'F'
+        neighbors = get_neighbors(pos)
+        if !@checked.include?(pos)
+            if self[pos] != 0 && !self[pos]
+                return
+            elsif self[pos] == '*'
+                cheat
+                puts 'You revealed a bomb... Game over!'
+                exit!
+            elsif self[pos] == 0
+            @checked << pos
+                neighbors.each do |neighbor|
+                    self[neighbor] = bomb_count(neighbor)
+                    if self[neighbor] == 0
+                        reveal(neighbor)
+                    end
+                end
+            end
+        end
+    end
+
+    def bomb_count(pos)
+        count = 0
+        neighbors = get_neighbors(pos)
+        neighbors.each do |neighbor|
+            count += 1 if self[neighbor] == '*'
+        end
+        return count
+    end
+
+    def get_neighbors(pos)
+        x,y = pos
+        neighbors = []
+
+        MOVES.each do |dx,dy|
+            new_pos = [x + dx, y + dy]
+
+            if new_pos.all? {|coord| coord.between?(0,8)} 
+                if new_pos != '*'
+                    neighbors << new_pos
+                end
+            end
+        end
+        return neighbors
+    end
+
     def num_bombs
         count = 0
         new_grid = grid.flatten
@@ -36,32 +88,6 @@ class Board
             count +=1 if ele == '*'
         end
         count
-    end
-
-    def flag(pos)
-        self[pos] = 'F'
-    end
-
-    def reveal(pos)
-        if self[pos] == '*'
-            puts 'You revealed a bomb... Game over!'
-            exit!
-        end
-    end
-
-    def adjacent_bombs(pos)
-        count = 0
-        x,y = pos
-        MOVES.each do |dx,dy|
-            new_pos = [x + dx, y + dy]
-
-            if new_pos.all? {|coord| coord.between?(0,8)}  
-                if self[new_pos] == '*'  
-                    count +=1
-                end
-            end
-        end
-        self[pos] = count
     end
 
     def drop_bombs
@@ -76,7 +102,7 @@ class Board
     def empty_board
         grid.map do |row| 
             row.map do |ele|
-                if ele == "*"
+                if ele == '*'
                     '_'
                 else
                     ele
@@ -87,8 +113,9 @@ class Board
 
     def solved?
         grid.each do |row|
-            return false if row.any? {|tile| tile == '*'}
+            return false if row.any? {|tile| tile == '_'}
         end
+        return true
     end
 
     def self.print_grid(grid)
