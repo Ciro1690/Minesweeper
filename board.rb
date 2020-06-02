@@ -35,13 +35,12 @@ class Board
     end
 
     def reveal(pos)
-        self[pos] = bomb_count(pos) if self[pos] != 'F'
+        self[pos] = bomb_count(pos) if self[pos] != 'F' && self[pos] != '*'
         neighbors = get_neighbors(pos)
         if !@checked.include?(pos)
             if self[pos] != 0 && !self[pos]
                 return
-            elsif self[pos] == '*'
-                cheat
+            elsif self[pos] == '*' 
                 puts 'You revealed a bomb... Game over!'
                 exit!
             elsif self[pos] == 0
